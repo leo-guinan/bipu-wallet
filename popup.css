@@ -1,0 +1,76 @@
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  width: 340px;
+  padding: 16px;
+  color: #1a1a1a;
+  background: #fff;
+}
+.wrap h1 { font-size: 18px; margin: 0 0 2px; }
+.sub { margin: 0 0 14px; color: #666; font-size: 13px; }
+.card {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.card h2 { font-size: 14px; margin: 0 0 8px; }
+.tag {
+  display: inline-block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  background: #f0f0f0;
+  color: #555;
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.address {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  word-break: break-all;
+  background: #f4f4f4;
+  border-radius: 6px;
+  padding: 8px;
+  color: #333;
+  margin: 6px 0;
+}
+.small { color: #777; font-size: 12px; margin: 4px 0; }
+.small.connected { color: #1a7f37; }
+button {
+  display: block;
+  width: 100%;
+  margin: 6px 0;
+  padding: 9px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+  font-size: 14px;
+  cursor: pointer;
+}
+button:hover { background: #f6f6f6; }
+.hidden { display: none !important; }
+.error { color: #c0392b; font-size: 13px; margin-top: 8px; }
+.field { display: block; font-size: 12px; color: #555; margin: 8px 0 4px; }
+.field input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+button.armed { background: #c0392b; color: #fff; border-color: #c0392b; font-weight: 600; }
+button.armed:hover { background: #a93226; }
+.result { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 13px; }
+.result.ok { background: #eafaf1; border: 1px solid #abebc6; }
+.result.err { background: #fdedec; border: 1px solid #f5b7b1; }
+.result .ok-title { margin: 0 0 6px; font-weight: 600; color: #1a7f37; }
+.result .err-title { margin: 0 0 6px; font-weight: 600; color: #c0392b; }
+.result .small { margin: 4px 0; }
+.result .mono { font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
+.result .warn { color: #8a6d3b; background: #fcf8e3; border-radius: 6px; padding: 6px; margin-top: 8px; }

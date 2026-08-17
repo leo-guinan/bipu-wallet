@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>BIPU Wallet</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="wrap">
+    <h1>BIPU Wallet</h1>
+    <p class="sub">Attestation via BIPU. Funds via Phantom.</p>
+
+    <section class="card">
+      <h2>BIPU identity <span class="tag">attestation</span></h2>
+      <p class="address" id="bipu-address">loading…</p>
+      <p class="small">Always on. Signs participation receipts. Never moves money.</p>
+      <button id="btn-copy-bipu">Copy address</button>
+    </section>
+
+    <section class="card">
+      <h2>Phantom wallet <span class="tag">funds</span></h2>
+      <div id="phantom-state">
+        <p class="small">Checking…</p>
+      </div>
+      <div class="phantom-actions" id="phantom-actions">
+        <button id="btn-connect-phantom">Connect Phantom</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Marvin go long <span class="tag">beta</span></h2>
+      <p class="small">Sell MARVIN for SOL via your Phantom. The SOL→OPEN step stays manual — this sells and records the commitment; it does not open the stock position for you.</p>
+      <label class="field">MARVIN amount
+        <input id="go-long-amount" type="number" min="1" step="1" placeholder="e.g. 1000000">
+      </label>
+      <button id="btn-go-long">Marvin go long</button>
+      <div id="go-long-result" class="result hidden"></div>
+    </section>
+
+    <section class="card">
+      <h2>Phone home <span class="tag">opt-in</span></h2>
+      <p class="small">Opt in to be counted as part of the network. Sends only your BIPU ID, version, and a timestamp — no page data, no browsing history.</p>
+      <button id="btn-phone-home">Phone home</button>
+      <div id="phone-home-result" class="result hidden"></div>
+    </section>
+
+    <p id="error" class="error hidden"></p>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
