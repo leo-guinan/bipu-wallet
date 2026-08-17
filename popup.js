@@ -85,53 +85,25 @@
     } catch (e) { setError('Copy failed: ' + (e?.message || e)); }
   });
 
-  // ---- Marvin go long: two-step confirm ----
+  // ---- Marvin go long: DISABLED until MARVIN graduates ----
+  // The button is disabled in HTML. This guard makes it impossible to trigger a
+  // swap even if the button were somehow re-enabled, until a release re-enables
+  // the feature after MARVIN graduates on pump.fun.
   const goBtn = $('btn-go-long');
   const resultEl = $('go-long-result');
-  let armed = false;
+  goBtn.addEventListener('click', async () => {
+    showResult(
+      '<p class="err-title">Marvin go long is disabled.</p>' +
+      '<p class="small">It will be enabled after MARVIN graduates on pump.fun, when the pool becomes routable.</p>',
+      false
+    );
+  });
 
   function showResult(html, ok) {
     resultEl.innerHTML = html;
     resultEl.classList.remove('hidden');
-    resultEl.className = 'result' + (ok ? ' ok' : ' err') + (ok ? '' : '');
+    resultEl.className = 'result' + (ok ? ' ok' : ' err');
   }
-
-  function armButton() {
-    armed = true;
-    goBtn.textContent = 'Confirm: sell MARVIN for SOL (Phantom will sign)';
-    goBtn.classList.add('armed');
-    setTimeout(() => { armed = false; goBtn.textContent = 'Marvin go long'; goBtn.classList.remove('armed'); }, 8000);
-  }
-
-  goBtn.addEventListener('click', async () => {
-    setError(null);
-    if (!armed) {
-      const amt = parseFloat($('go-long-amount').value);
-      if (!Number.isFinite(amt) || amt <= 0) { setError('Enter a valid MARVIN amount'); return; }
-      armButton();
-      return;
-    }
-    armed = false;
-    goBtn.textContent = 'Processing…';
-    goBtn.disabled = true;
-    try {
-      const amt = parseFloat($('go-long-amount').value);
-      const res = await chrome.runtime.sendMessage({ type: 'MARVIN_GO_LONG', amountMarvin: amt });
-      if (res && res.error) throw new Error(res.error);
-      showResult(
-        '<p class="ok-title">SOL received. Position committed.</p>' +
-        '<p class="small">Sold <b>' + amt + '</b> MARVIN → <b>' + Number(res.solReceived || 0).toFixed(6) + '</b> SOL</p>' +
-        '<p class="small mono">tx: ' + (res.signature ? res.signature.slice(0, 20) + '…' : '?') + '</p>' +
-        '<p class="small warn">OPEN seam is MANUAL: move this SOL to your brokerage/tokenized-stock venue to open the OPEN long. This button did NOT open a stock position.</p>',
-        true
-      );
-    } catch (e) {
-      showResult('<p class="err-title">Failed: ' + (e?.message || e) + '</p><p class="small">If the pool is not routable, retry later.</p>', false);
-    } finally {
-      goBtn.textContent = 'Marvin go long';
-      goBtn.disabled = false;
-    }
-  });
 
   // ---- Phone home: explicit opt-in presence signal ----
   const phBtn = $('btn-phone-home');

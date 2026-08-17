@@ -12,9 +12,12 @@ fund, and not an investment product.
   Signs participation receipts. Never moves money.
 - **Phantom (funds)** — connect your existing Phantom wallet. This is the only
   money-moving path. Keys stay in Phantom.
-- **Marvin go long (beta)** — sells MARVIN for SOL via your Phantom, then records
-  a commitment to an OPEN long. The SOL→OPEN crossing is a manual step; the
-  button does not open a stock position for you.
+- **Tokens** — quick links to MARVIN and HumanPower (HP) on pump.fun.
+- **Marvin go long (disabled)** — sells MARVIN for SOL via your Phantom, then
+  records a commitment to an OPEN long. Currently **disabled until MARVIN
+  graduates on pump.fun** (the pool must be routable before any trade is
+  possible). The SOL→OPEN crossing is a manual step; the button never opens a
+  stock position for you.
 - **Phone home (opt-in)** — tells the network you exist.
 
 ## The network count, stated honestly

@@ -74,3 +74,21 @@ button.armed:hover { background: #a93226; }
 .result .small { margin: 4px 0; }
 .result .mono { font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
 .result .warn { color: #8a6d3b; background: #fcf8e3; border-radius: 6px; padding: 6px; margin-top: 8px; }
+.card.disabled { opacity: 0.75; background: #fafafa; border-color: #e5e5e5; }
+.card.disabled button { background: #eee; color: #999; cursor: not-allowed; border-color: #ddd; }
+.card.disabled button:hover { background: #eee; }
+.link-btn {
+  display: block;
+  width: 100%;
+  margin: 6px 0;
+  padding: 9px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+.link-btn:hover { background: #f6f6f6; }
