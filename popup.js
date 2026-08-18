@@ -232,12 +232,23 @@
 
   contribBtn.addEventListener('click', async () => {
     setError(null);
+    let amount = 42;
+    const sel = $('contribute-amount');
+    if (sel && sel.value === 'custom') {
+      amount = parseFloat($('contribute-custom').value);
+      if (!Number.isFinite(amount) || amount < 1 || amount > 500) {
+        vaultResult.innerHTML = '<p class="err-title">Enter a custom amount between $1 and $500.</p>';
+        vaultResult.classList.remove('hidden');
+        vaultResult.className = 'result err';
+        return;
+      }
+    }
     contribBtn.disabled = true;
     contribBtn.textContent = 'Opening checkout…';
     try {
       const status = await chrome.runtime.sendMessage({ type: 'GET_STATUS' });
       const pk = status?.bipu?.publicKeyBase58 || '';
-      const res = await chrome.runtime.sendMessage({ type: 'VAULT_CONTRIBUTE', publicKey: pk, amountUsd: 25 });
+      const res = await chrome.runtime.sendMessage({ type: 'VAULT_CONTRIBUTE', publicKey: pk, amountUsd: amount });
       if (res && res.error) {
         vaultResult.innerHTML =
           '<p class="err-title">Contribution not available: ' + (res.error) + '</p>' +
@@ -250,7 +261,7 @@
         chrome.tabs.create({ url: res.checkout_url });
         vaultResult.innerHTML =
           '<p class="ok-title">Checkout opened.</p>' +
-          '<p class="small">Your contribution charges the battery as support — not an investment.</p>';
+          '<p class="small">Your $' + amount + ' contribution charges the battery as support — not an investment.</p>';
         vaultResult.classList.remove('hidden');
         vaultResult.className = 'result ok';
       }
@@ -264,6 +275,11 @@
       contribBtn.disabled = false;
       contribBtn.textContent = 'Charge the battery';
     }
+  });
+
+  // toggle custom amount input
+  $('contribute-amount').addEventListener('change', () => {
+    $('contribute-custom').classList.toggle('hidden', $('contribute-amount').value !== 'custom');
   });
 
   loadBattery();

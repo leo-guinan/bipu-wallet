@@ -40,6 +40,13 @@
         <div class="battery-fill" id="battery-fill" style="width:0%"></div>
       </div>
       <p class="small" id="battery-text">Loading…</p>
+      <label class="field">Amount
+        <select id="contribute-amount">
+          <option value="42" selected>$42</option>
+          <option value="custom">Custom…</option>
+        </select>
+      </label>
+      <input type="number" id="contribute-custom" class="field-input hidden" placeholder="Custom $ amount (1–500)" min="1" max="500" step="1">
       <button id="btn-contribute">Charge the battery</button>
       <p class="small warn">This is support that charges the vault, not an investment and not a token-payout promise.</p>
       <div id="vault-result" class="result hidden"></div>

@@ -64,6 +64,26 @@ button:hover { background: #f6f6f6; }
   font-size: 14px;
   box-sizing: border-box;
 }
+.field select {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+}
+.field-input {
+  display: block;
+  width: 100%;
+  margin: 6px 0;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
 button.armed { background: #c0392b; color: #fff; border-color: #c0392b; font-weight: 600; }
 button.armed:hover { background: #a93226; }
 .result { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 13px; }
