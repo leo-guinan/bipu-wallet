@@ -22,6 +22,41 @@ fund, and not an investment product.
 - **Bot indicator (tweets)** — a small colored dot next to an author's name on
   x.com / twitter.com flagging confirmed labels and classifier-flagged bots.
   Purely local: no network, no data leaves the browser.
+- **Developer mode (training)** — capture the tweets/notifications you view into
+  a downloadable JSONL training dump for offline analysis, building toward a
+  fast account-lookup service the extension can use. Local only; nothing leaves
+  the browser until you click Export.
+
+## Developer mode — training capture
+
+Building the bot indicator on real data requires a labeled corpus. Developer
+mode collects it:
+
+1. Open the popup → **Developer mode** → toggle **Training capture on**.
+2. Browse x.com normally. Every tweet/notification the content script sees is
+   accumulated (deduped by tweet URL) with its classifier verdict into a local
+   buffer (`chrome.storage.local`).
+3. Click **Capture current view** to force-scan what's on screen, or **Export
+   dump (JSONL)** to download `bipu-train-capture-<stamp>.jsonl`.
+4. Analyze the dump offline, then build the lookup artifact:
+
+```bash
+node scripts/build-lookup.js path/to/capture.jsonl  # -> lookup.json next to it
+```
+
+`lookup.json` (schema `bipu.lookup.v1`) is a compact per-handle summary —
+aggregate verdict (bot/human/uncertain/mixed/thin), bot/human/uncertain counts,
+top label + score, top signals, first/last seen, and tweet URLs. It's the seed
+for the quick-lookup service: the extension can bundle it to short-circuit
+re-classifying accounts it has already seen in a dump. Regenerate it after each
+fresh dump.
+
+The capture record schema is `bipu.train_capture.v1`:
+`{schema, captured_at, source (home/notifications/tweet_detail/other),
+page_url, tweet:{handle,name,text,url}, classifier:{label,score,confidence,signals}}`.
+
+Nothing phones home. Capture is written only to local storage; the only way data
+leaves the browser is your explicit **Export dump** download.
 
 ## Bot indicator on tweets
 
@@ -71,11 +106,13 @@ only aggregate counts. It never returns raw public keys. See `collector/README.m
 - `injected/web3-bundle.js` — bundled `@solana/web3.js` (build artifact).
 - `lib/bipu-wallet.js` — pure WebCrypto Ed25519 keypair + signing.
 - `lib/bot-fingerprint.js` — timeline-aware bot classifier (shared with review).
-- `content/bot-indicator.js` — tweet badge content script (x.com/twitter.com).
+- `content/bot-indicator.js` — tweet badge content script + training capture (x.com/twitter.com).
 - `content/known-labels.js` — baked-in confirmed labels (generated).
 - `scripts/gen-known-labels.js` — regenerate baked-in labels from decisions.
+- `scripts/build-lookup.js` — build a per-handle lookup artifact from a training dump.
 - `review/bot-review.html` — human review/triage page (flip through, confirm).
 - `test-page.html` — fixture harness for the badge content script.
+- `test-train.html` — training-capture harness.
 - `collector/` — the phone-home presence collector.
 
 ## Security boundary

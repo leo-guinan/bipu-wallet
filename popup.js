@@ -135,5 +135,72 @@
     }
   });
 
+  // ---- Developer mode / training capture ----
+  const trainToggle = $('train-toggle');
+  const trainStatusEl = $('train-status');
+  const trainResult = $('train-result');
+
+  async function trainActiveTab(type, payload) {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tab = tabs && tabs[0];
+    if (!tab || typeof tab.id !== 'number') throw new Error('No active tab to capture from. Open x.com first.');
+    return await chrome.tabs.sendMessage(tab.id, { type, ...(payload || {}) });
+  }
+
+  function renderTrainStatus() {
+    trainActiveTab('TRAIN_STATUS').then((s) => {
+      trainToggle.checked = !!(s && s.enabled);
+      trainStatusEl.textContent = (s && s.enabled ? 'on' : 'off') + ' · ' + (s ? s.captured : 0) + ' captured';
+    }).catch(() => {
+      trainToggle.checked = false;
+      trainStatusEl.textContent = 'off · 0 captured (no x.com tab)';
+    });
+  }
+
+  trainToggle.addEventListener('change', async () => {
+    try {
+      await trainActiveTab('TRAIN_SET_MODE', { on: trainToggle.checked });
+      renderTrainStatus();
+    } catch (e) {
+      trainToggle.checked = false;
+      setError('Training mode needs an x.com tab open: ' + (e?.message || e));
+    }
+  });
+
+  $('btn-train-capture').addEventListener('click', async () => {
+    try {
+      const res = await trainActiveTab('TRAIN_CAPTURE_NOW');
+      renderTrainStatus();
+      trainResult.innerHTML = '<p class="small ok-title">Captured. Total in buffer: <b>' + (res && res.captured) + '</b>.</p>';
+      trainResult.classList.remove('hidden'); trainResult.className = 'result ok';
+    } catch (e) {
+      setError('Capture failed: ' + (e?.message || e));
+    }
+  });
+
+  $('btn-train-clear').addEventListener('click', async () => {
+    try {
+      await trainActiveTab('TRAIN_CLEAR');
+      renderTrainStatus();
+      trainResult.innerHTML = '<p class="small">Buffer cleared.</p>';
+      trainResult.classList.remove('hidden'); trainResult.className = 'result';
+    } catch (e) { setError('Clear failed: ' + (e?.message || e)); }
+  });
+
+  $('btn-train-export').addEventListener('click', async () => {
+    try {
+      const res = await trainActiveTab('TRAIN_GET_RECORDS');
+      const records = (res && res.records) || [];
+      if (!records.length) { setError('Nothing to export. Turn on training capture and view some tweets first.'); return; }
+      const body = records.map((r) => JSON.stringify(r)).join('\n') + '\n';
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const url = 'data:application/x-ndjson;charset=utf-8,' + encodeURIComponent(body);
+      await chrome.downloads.download({ url, filename: 'bipu-train-capture-' + stamp + '.jsonl', saveAs: true });
+      trainResult.innerHTML = '<p class="small ok-title">Exported <b>' + records.length + '</b> records.</p>';
+      trainResult.classList.remove('hidden'); trainResult.className = 'result ok';
+    } catch (e) { setError('Export failed: ' + (e?.message || e)); }
+  });
+
+  renderTrainStatus();
   refreshStatus();
 })();

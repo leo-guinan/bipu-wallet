@@ -88,9 +88,9 @@
     return t.length > 110 ? t.slice(0, 107) + '…' : t;
   }
 
-  // ---- extract author handle + display name + tweet text from a tweet article ----
+  // ---- extract author handle + display name + tweet text + url from a tweet article ----
   function extractTweet(article) {
-    var handle = null, name = '', text = '';
+    var handle = null, name = '', text = '', url = null;
     // author name block contains the display name + @handle in spans
     var userBlock = article.querySelector('[data-testid="User-Name"]');
     if (userBlock) {
@@ -101,8 +101,13 @@
         else if (t && !name) { name = t; }
       }
     }
-    if (!handle) {
-      // fallback: any link whose href matches /<handle>/status/
+    // status link: /<handle>/status/<id> — gives both handle fallback + tweet url/id
+    var statusLink = article.querySelector('a[href*="/status/"]');
+    var statusMatch = statusLink ? ((statusLink.getAttribute('href') || '').match(/^\/([A-Za-z0-9_]{1,15})\/status\/(\d+)/)) : null;
+    if (statusMatch) {
+      if (!handle) handle = statusMatch[1].toLowerCase();
+      if (statusMatch[2]) url = 'https://x.com/' + statusMatch[1] + '/status/' + statusMatch[2];
+    } else if (!handle) {
       var links = article.querySelectorAll('a[href*="/status/"]');
       for (var j = 0; j < links.length; j++) {
         var m = (links[j].getAttribute('href') || '').match(/^\/([A-Za-z0-9_]{1,15})\/status\//);
@@ -111,7 +116,7 @@
     }
     var textEl = article.querySelector('[data-testid="tweetText"]');
     if (textEl) text = textEl.textContent || '';
-    return { handle: handle, name: name, text: text };
+    return { handle: handle, name: name, text: text, url: url };
   }
 
   // ---- render a badge into the author name block ----
@@ -173,6 +178,11 @@
     var account = { name: info.name, handle: info.handle };
     var r = fp.classify(account, s, []); // sample only; no profile/timeline fetch
 
+    // Training capture: when dev mode is on, record EVERY scanned tweet (with
+    // its classifier verdict) into the buffer, regardless of the badge gate.
+    // The goal is raw data collection, so ambiguous/low-evidence tweets count too.
+    captureTrain(article, info, r);
+
     // A pump/shill NAME fires instantly — deterministic evidence, no tweet wait.
     // Classifier's namePump score is already >=55 in this case.
     var nameFired = r.subScores && r.subScores.namePump >= 55;
@@ -218,4 +228,124 @@
   }
   if (document.body) start();
   else document.addEventListener('DOMContentLoaded', start);
+
+  // ================= TRAINING CAPTURE (developer mode) =================
+  // When dev mode is ON, every tweet the scanner sees is accumulated into a
+  // deduped capture buffer persisted to chrome.storage.local, so Leo can
+  // download a training dump for offline analysis -> eventually a fast
+  // account-lookup service the extension can use. Capture is local-first:
+  // nothing leaves the browser except the user's explicit export download.
+  var TRAIN_KEY = 'bipu_train_captures_v1';
+  var TRAIN_MODE_KEY = 'bipu_train_mode_v1';
+  var trainEnabled = false;
+  var trainBuffer = [];       // in-memory current-session records
+  var seenTrainUrls = {};     // dedupe by tweet url within this session
+  var TRAIN_MAX_SESSION = 2000;
+
+  function readTrainMode() {
+    return new Promise(function (resolve) {
+      try {
+        chrome.storage.local.get(TRAIN_MODE_KEY, function (r) { resolve(!!(r && r[TRAIN_MODE_KEY])); });
+      } catch (e) { resolve(false); }
+    });
+  }
+
+  function saveTrainBuffer() {
+    try {
+      chrome.storage.local.set({ [TRAIN_KEY]: trainBuffer.slice(-TRAIN_MAX_SESSION) });
+    } catch (e) {}
+  }
+
+  // Record one tweet (with its classifier verdict) into the capture buffer.
+  function captureTrain(article, info, verdict) {
+    if (!trainEnabled) return;
+    if (!info || !info.handle) return;
+    if (!info.text && !info.url) return;
+    var key = info.url || (info.handle + '|' + info.text);
+    if (seenTrainUrls[key]) return;
+    seenTrainUrls[key] = true;
+
+    var pagePath = location.pathname || '';
+    var source = 'home';
+    if (/\/notifications/.test(pagePath)) source = 'notifications';
+    else if (/\/status\/\d+/.test(pagePath)) source = 'tweet_detail';
+    else if (pagePath.length > 1 && pagePath !== '/home') source = 'profile_or_other';
+
+    var rec = {
+      schema: 'bipu.train_capture.v1',
+      captured_at: new Date().toISOString(),
+      source: source,
+      page_url: location.href,
+      tweet: {
+        handle: info.handle,
+        name: info.name || '',
+        text: info.text || '',
+        url: info.url || null,
+      },
+    };
+    if (verdict && verdict.label) {
+      rec.classifier = {
+        label: verdict.label,
+        score: verdict.score,
+        confidence: verdict.confidence,
+        signals: verdict.signals || [],
+      };
+    }
+    trainBuffer.push(rec);
+    if (trainBuffer.length % 25 === 0) saveTrainBuffer();
+  }
+
+  // Current view capture: force a scan and drain everything into the buffer.
+  function captureCurrentView() {
+    var articles = document.querySelectorAll('article[data-testid="tweet"]');
+    for (var i = 0; i < articles.length; i++) {
+      var info = extractTweet(articles[i]);
+      var account = { name: info.name, handle: info.handle };
+      var sample = info.text ? [info.text] : [];
+      var r = fp.classify(account, sample, []);
+      captureTrain(articles[i], info, r);
+    }
+    saveTrainBuffer();
+    return { captured: trainBuffer.length };
+  }
+
+  function trainStatus() {
+    return { enabled: trainEnabled, captured: trainBuffer.length };
+  }
+
+  function clearTrain() {
+    trainBuffer = [];
+    seenTrainUrls = {};
+    try { chrome.storage.local.remove(TRAIN_KEY); } catch (e) {}
+    return { cleared: true };
+  }
+
+  // message API for the popup (capture current view / status / clear / mode)
+  chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+    if (!message || !message.type || message.type.indexOf('TRAIN_') !== 0) return false;
+    (async () => {
+      switch (message.type) {
+        case 'TRAIN_STATUS':
+          return trainStatus();
+        case 'TRAIN_CAPTURE_NOW':
+          return captureCurrentView();
+        case 'TRAIN_CLEAR':
+          return clearTrain();
+        case 'TRAIN_SET_MODE':
+          trainEnabled = !!message.on;
+          try { chrome.storage.local.set({ [TRAIN_MODE_KEY]: trainEnabled }); } catch (e) {}
+          if (!trainEnabled) { trainBuffer = []; seenTrainUrls = {}; }
+          return { enabled: trainEnabled };
+        case 'TRAIN_GET_RECORDS':
+          return { records: trainBuffer, count: trainBuffer.length };
+        default:
+          return { error: 'unknown_train_message' };
+      }
+    })().then(sendResponse).catch((e) => sendResponse({ error: String(e && e.message || e) }));
+    return true;
+  });
+
+  // load the stored dev-mode flag at startup
+  readTrainMode().then(function (on) { trainEnabled = on; });
+
 })();

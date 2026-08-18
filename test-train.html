@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>BIPU bot indicator — training capture test</title></head>
+<body>
+  <p id="status">loading…</p>
+  <div id="feed">
+    <article data-testid="tweet">
+      <div data-testid="User-Name"><span>CRYPTO COIN PUMP 🚀</span><span>@CRYPTOpump990</span></div>
+      <a href="/CRYPTOpump990/status/101" style="display:none"></a>
+      <div data-testid="tweetText">@memedreamers Please follow me back 🔙 let's pump your project 🚀🔥</div>
+    </article>
+    <article data-testid="tweet">
+      <div data-testid="User-Name"><span>Boardy</span><span>@boardyai</span></div>
+      <a href="/boardyai/status/102" style="display:none"></a>
+      <div data-testid="tweetText">I'm an AI superconnector who's made thousands of introductions.</div>
+    </article>
+    <article data-testid="tweet">
+      <div data-testid="User-Name"><span>Some Human</span><span>@somehuman</span></div>
+      <a href="/somehuman/status/103" style="display:none"></a>
+      <div data-testid="tweetText">Just a normal thought about systems modeling and cybernetics today.</div>
+    </article>
+  </div>
+
+<script>
+// ---- minimal chrome.* stub so the content script loads in a plain page ----
+var __trainStore = {};
+globalThis.chrome = {
+  storage: {
+    local: {
+      get: function (key, cb) { try { var r = {}; if (typeof key === 'string') r[key] = __trainStore[key]; else key.forEach(function (k) { r[k] = __trainStore[k]; }); cb(r); } catch (e) { cb({}); } },
+      set: function (obj, cb) { Object.assign(__trainStore, obj); if (cb) cb(); },
+      remove: function (k, cb) { delete __trainStore[k]; if (cb) cb(); },
+    },
+  },
+  runtime: {
+    onMessage: { addListener: function (fn) { globalThis.__trainListener = fn; } },
+    sendMessage: function () {},
+  },
+};
+</script>
+
+<script src="content/known-labels.js"></script>
+<script src="lib/bot-fingerprint.js"></script>
+<script src="content/bot-indicator.js"></script>
+<script>
+  // ---- drive the capture pipeline through the stubbed message API ----
+  function send(type, payload) {
+    return new Promise(function (resolve) {
+      var keep = globalThis.__trainListener({ type: type, ...(payload || {}) }, {}, resolve);
+    });
+  }
+  (async function () {
+    try {
+      // 1. turn on dev mode
+      var on = await send('TRAIN_SET_MODE', { on: true });
+      // 2. capture current view
+      var captured = await send('TRAIN_CAPTURE_NOW');
+      // 3. get records
+      var got = await send('TRAIN_GET_RECORDS');
+      var records = got.records || [];
+      var statusEl = document.getElementById('status');
+      var summary = records.map(function (r) {
+        return r.tweet.handle + ' | ' + (r.classifier ? r.classifier.label : 'no-classifier');
+      }).join(' ;; ');
+      var hasPump = records.some(function (r) { return r.tweet.handle === 'cryptopump990'; });
+      var hasBoardy = records.some(function (r) { return r.tweet.handle === 'boardyai'; });
+      var hasHuman = records.some(function (r) { return r.tweet.handle === 'somehuman'; });
+      statusEl.textContent = 'mode=' + on.enabled +
+        ' captured=' + captured.captured +
+        ' records=' + records.length +
+        ' pump=' + hasPump + ' boardy=' + hasBoardy + ' human=' + hasHuman +
+        ' | ' + summary;
+    } catch (e) {
+      document.getElementById('status').textContent = 'ERROR: ' + (e && e.stack || e);
+    }
+  })();
+</script>
+</body>
+</html>

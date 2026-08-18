@@ -48,6 +48,22 @@
       <div id="phone-home-result" class="result hidden"></div>
     </section>
 
+    <section class="card">
+      <h2>Developer mode <span class="tag">training</span></h2>
+      <p class="small">Capture tweets/notifications you view into a training dump for offline analysis — building a fast account-lookup service. Local only: nothing leaves this browser until you click Export.</p>
+      <label class="toggle-row">
+        <input type="checkbox" id="train-toggle">
+        <span>Training capture on</span>
+      </label>
+      <div class="train-actions">
+        <button id="btn-train-capture">Capture current view</button>
+        <button id="btn-train-export">Export dump (JSONL)</button>
+        <button id="btn-train-clear">Clear buffer</button>
+      </div>
+      <p id="train-status" class="small">off · 0 captured</p>
+      <div id="train-result" class="result hidden"></div>
+    </section>
+
     <p id="error" class="error hidden"></p>
   </div>
   <script src="popup.js"></script>

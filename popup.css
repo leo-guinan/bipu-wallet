@@ -92,3 +92,14 @@ button.armed:hover { background: #a93226; }
   box-sizing: border-box;
 }
 .link-btn:hover { background: #f6f6f6; }
+
+/* Developer mode / training capture */
+.toggle-row { display: flex; align-items: center; gap: 8px; margin: 10px 0; font-size: 14px; cursor: pointer; }
+.toggle-row input { width: 16px; height: 16px; cursor: pointer; }
+.train-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+.train-actions button {
+  padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff;
+  color: #111; font-size: 13px; cursor: pointer;
+}
+.train-actions button:hover { background: #f0f0f0; }
+#train-status { margin-top: 8px; color: #555; }

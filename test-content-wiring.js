@@ -22,6 +22,8 @@ check('script order: known-labels -> classifier -> indicator',
   JSON.stringify(order));
 check('x.com + twitter.com host permission present',
   manifest.host_permissions.includes('https://x.com/*') && manifest.host_permissions.includes('https://twitter.com/*'));
+check('downloads permission present (training export)',
+  manifest.permissions.includes('downloads'));
 
 // 2. known-labels file is generated (not stale): handles match human-decisions.json
 const decisions = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'fingerprint', 'human-decisions.json'), 'utf8')).decisions;
