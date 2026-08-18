@@ -6,6 +6,18 @@ const fp = require('./lib/bot-fingerprint.js');
 // account records where resolvable; sample = actual reply text (from /tmp/ext_replies.json)
 const cases = [
   {
+    // name-based pump account: must fire instantly with zero tweet evidence
+    id: 'CRYPTOpump990', expect: 'BOT · pump (name + numeric suffix)',
+    account: { name: 'CRYPTO COIN PUMP 🚀', handle: 'cryptopump990' },
+    sample: [],
+  },
+  {
+    // inbox-farm pump account with a name that says pump -> pump/farm
+    id: 'CRYPTOpump990+inbox', expect: 'BOT · pump/farm (name + inbox)',
+    account: { name: 'CRYPTO COIN PUMP 🚀', handle: 'cryptopump990' },
+    sample: ['@memedreamers Please follow me back 🔙 let\'s pump your project 🚀🔥'],
+  },
+  {
     id: '4895618824', expect: 'BOT · token-shill',
     account: { followers: null, following: null, bio: 'crypto builder' },
     sample: [

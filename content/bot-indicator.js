@@ -88,16 +88,17 @@
     return t.length > 110 ? t.slice(0, 107) + '…' : t;
   }
 
-  // ---- extract author handle + tweet text from a tweet article ----
+  // ---- extract author handle + display name + tweet text from a tweet article ----
   function extractTweet(article) {
-    var handle = null, text = '';
-    // author name block contains the @handle in a span
+    var handle = null, name = '', text = '';
+    // author name block contains the display name + @handle in spans
     var userBlock = article.querySelector('[data-testid="User-Name"]');
     if (userBlock) {
       var spans = userBlock.querySelectorAll('span');
       for (var i = 0; i < spans.length; i++) {
         var t = (spans[i].textContent || '').trim();
-        if (/^@[A-Za-z0-9_]{1,15}$/.test(t)) { handle = t.toLowerCase().replace(/^@/, ''); break; }
+        if (/^@[A-Za-z0-9_]{1,15}$/.test(t)) { handle = t.toLowerCase().replace(/^@/, ''); }
+        else if (t && !name) { name = t; }
       }
     }
     if (!handle) {
@@ -110,7 +111,7 @@
     }
     var textEl = article.querySelector('[data-testid="tweetText"]');
     if (textEl) text = textEl.textContent || '';
-    return { handle: handle, text: text };
+    return { handle: handle, name: name, text: text };
   }
 
   // ---- render a badge into the author name block ----
@@ -163,15 +164,20 @@
       return;
     }
 
-    // unknown account: accumulate sample, flag only when confident
+    // unknown account: accumulate sample
     if (!samples[info.handle]) samples[info.handle] = [];
     var s = samples[info.handle];
     // avoid double-counting the same text within a session
     if (s.indexOf(info.text) === -1) s.push(info.text);
-    if (s.length < MIN_TWEETS) return; // not enough evidence yet
 
-    var account = {};
+    var account = { name: info.name, handle: info.handle };
     var r = fp.classify(account, s, []); // sample only; no profile/timeline fetch
+
+    // A pump/shill NAME fires instantly — deterministic evidence, no tweet wait.
+    // Classifier's namePump score is already >=55 in this case.
+    var nameFired = r.subScores && r.subScores.namePump >= 55;
+    if (s.length < MIN_TWEETS && !nameFired) return; // not enough evidence yet (name bypasses this)
+
     if (r.label.indexOf('BOT') === 0 && r.score >= MIN_SCORE) {
       renderBadge(article, info.handle, {
         cls: 'bipu-bot', label: 'BOT',
