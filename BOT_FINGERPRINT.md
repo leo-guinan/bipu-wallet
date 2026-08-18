@@ -69,6 +69,34 @@ single most important lesson of the full-pull approach: **a bot that writes
 smart-sounding replies is still a bot if its timeline shows coordinated tagging,
 token launches, link-only posts, or ritual cadence.**
 
+## Review tool (`review/bot-review.html`)
+
+The classifier labels *behavior* (automation patterns). It cannot judge *intent* —
+that's a human call, and a good bot (an automated account building something
+real) and a bad bot (a shill/farm) can look behaviorally identical. Use the
+review page to separate the two.
+
+- One self-contained HTML file, openable from `file://` (no server needed).
+  Regenerate with `node scripts/gen-bot-review.js` after data updates.
+- Flip through all accounts; each shows live profile (handle, F:F, age, bio),
+  the classifier verdict + score + signals, the reply evidence sent to
+  @leo_guinan/@marvin_panics, and the account's own recent timeline.
+- Two judgment axes per account:
+  - **Behavioral label**: Confirm / Reject / Revise / Skip — is the automation
+    claim right?
+  - **Intent**: Good bot / Bad bot / Neutral-human / Unclear.
+- Free-text reasoning (firsthand knowledge goes here — e.g. "I've spoken to
+  them; building a token ecosystem with positive feedback loops").
+- Decisions persist to `localStorage`; "Export decisions (JSON)" downloads them.
+
+Known judgment context (from this analysis, verify on the page):
+- @MemeForTrees (4895618824) and @boardyai (1766194375044804608) are flagged
+  BOT behaviorally — but you've flagged both as **good** actors (MemeForTrees is
+  building a token ecosystem with positive feedback loops; boardyai is an
+  AI superconnector). Confirm the behavior claim, then set Intent = Good.
+- The page includes the 11th account (1720665183188922368, a profile-dump bot)
+  which has replies but no live profile/timeline — it renders as an edge case.
+
 ## How the classifier works (`lib/bot-fingerprint.js`)
 
 Pure-JS IIFE matching the extension's existing module style. Inputs:
