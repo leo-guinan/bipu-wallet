@@ -99,6 +99,21 @@ only aggregate counts. It never returns raw public keys. See `collector/README.m
 2. Open any web page (Phantom must be installed to use the funds path).
 3. Open the popup.
 
+## Package (distributable zip)
+
+Build a clean, installable `.zip` of only the browser-runtime files:
+
+```bash
+./scripts/package_extension.sh          # -> dist/bipu-wallet-<version>.zip
+```
+
+The script stages exactly the runtime files, runs syntax + manifest checks, scans
+for secrets and forbidden content, and writes a receipt (file list, size, sha256).
+It excludes `data/`, `node_modules/`, `collector/`, tests, and dev-only files.
+
+To install the zip: download, unzip, then `chrome://extensions` → Developer mode →
+**Load unpacked** → select the unzipped folder.
+
 ## Repo layout
 
 - `manifest.json`, `background.js`, `popup.*`, `bridge.js` — MV3 extension core.

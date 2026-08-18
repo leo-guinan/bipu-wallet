@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 collector/phone_home_events.jsonl
 .env
+dist/
