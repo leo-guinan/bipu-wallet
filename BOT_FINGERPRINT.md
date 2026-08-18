@@ -69,6 +69,50 @@ single most important lesson of the full-pull approach: **a bot that writes
 smart-sounding replies is still a bot if its timeline shows coordinated tagging,
 token launches, link-only posts, or ritual cadence.**
 
+## Human calibration (Leo's review, 2026-08-18)
+
+Leo reviewed all 11 accounts in `review/bot-review.html` and exported his
+judgments to `data/fingerprint/human-decisions.json`. Evaluating the classifier
+against them (`node eval-human-decisions.js`):
+
+```
+classifier label              human-behavior  intent   match
+UNCERTAIN                      reject          neutral  OK
+BOT · coordinated-cohort       reject          neutral  MISS   <- AlmostMedia (human)
+BOT · link-dropper             reject          neutral  MISS   <- garcia590 (human)
+UNCERTAIN                      reject          neutral  OK
+BOT · coordinated-cohort       confirm         good     OK     <- boardyai
+BOT · coordinated-cohort       confirm         good     OK     <- MemeForTrees
+BOT · profile-dump             confirm         good     OK     <- grok response
+BOT · meme/tagline-repeater    reject          neutral  MISS   <- alchemicAV (human)
+UNCERTAIN                      reject          neutral  OK
+UNCERTAIN                      reject          neutral  OK
+UNCERTAIN                      reject          neutral  OK
+
+Bot-recall:    3/3 = 100%   (every real bot caught)
+Bot-precision: 3/6 = 50%    (3 false positives)
+Accuracy:      8/11
+```
+
+Three findings worth acting on:
+
+1. **100% recall, 50% precision.** No false negatives — every bot Leo confirmed
+   the classifier caught. But it over-flagged 3 humans as bots: @AlmostMedia
+   (daily-countdown signal fired on a human's ritual "Day NNNN" posts),
+   @garcia590 (link-dropper fired on a human crypto researcher), @alchemicAV
+   (meme/tagline fired on a human). The daily-countdown and link-dropper
+   thresholds are too aggressive; the meme/tagline classifier needs account
+   size/listedness context (@alchemicAV has only 515 followers but a real
+   SIRISYS bio and 695 media posts).
+2. **All 3 confirmed bots are GOOD actors** — @MemeForTrees (built a BIPU
+   endowment fed by memes), @boardyai (helpful AI superconnector), and the
+   grok profile-dump. No bad bots in this window. Good-bot classification is
+   not the same as behavioral bot detection; the two axes are independent and
+   both are needed.
+3. **The behavioral label is a triage flag, not a verdict.** Precision 50%
+   means roughly half of BOT flags need human confirmation before any action.
+   The review page exists precisely because of this.
+
 ## Review tool (`review/bot-review.html`)
 
 The classifier labels *behavior* (automation patterns). It cannot judge *intent* —

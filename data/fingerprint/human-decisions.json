@@ -1,0 +1,82 @@
+{
+  "generated": "2026-08-18T11:01:05.991Z",
+  "decisions": {
+    "4895618824": {
+      "handle": "MemeForTrees",
+      "behavioral": "confirm",
+      "intent": "good",
+      "reason": "Had a call, they set up an endowment for BIPU that will get fed over time via the memes being shared.",
+      "updatedAt": "2026-08-18T10:56:34.561Z"
+    },
+    "1766194375044804608": {
+      "handle": "boardyai",
+      "behavioral": "confirm",
+      "intent": "good",
+      "reason": "Boardy is a helpful and good bot",
+      "updatedAt": "2026-08-18T10:56:54.345Z"
+    },
+    "1720665183188922368": {
+      "handle": "1720665183188922368",
+      "behavioral": "confirm",
+      "intent": "good",
+      "reason": "looks like a response from grok",
+      "updatedAt": "2026-08-18T11:01:04.805Z"
+    },
+    "8537442": {
+      "handle": "lilchiva",
+      "behavioral": "reject",
+      "intent": "neutral",
+      "reason": "human I've interested with",
+      "updatedAt": "2026-08-18T10:58:27.920Z"
+    },
+    "18842214": {
+      "handle": "AlmostMedia",
+      "behavioral": "reject",
+      "intent": "neutral",
+      "reason": "She's human",
+      "updatedAt": "2026-08-18T10:58:38.510Z"
+    },
+    "48606995": {
+      "handle": "garcia590",
+      "behavioral": "reject",
+      "intent": "neutral",
+      "reason": "garcia is a human focused on crypto research",
+      "updatedAt": "2026-08-18T10:58:13.666Z"
+    },
+    "1041016105": {
+      "handle": "Steph_Curdy",
+      "behavioral": "reject",
+      "intent": "neutral",
+      "reason": "Human, have had calls with him",
+      "updatedAt": "2026-08-18T10:57:53.855Z"
+    },
+    "862488191638671360": {
+      "handle": "alchemicAV",
+      "behavioral": "reject",
+      "intent": "neutral",
+      "reason": "He's human. We've had a call and I know him",
+      "updatedAt": "2026-08-18T10:57:28.489Z"
+    },
+    "1485978825787858946": {
+      "handle": "Shadow_Rebbe",
+      "behavioral": "reject",
+      "intent": "neutral",
+      "reason": "Human, have done some work with",
+      "updatedAt": "2026-08-18T10:58:55.705Z"
+    },
+    "1400492097082327040": {
+      "handle": "jessyka_boat",
+      "behavioral": "reject",
+      "intent": "neutral",
+      "reason": "Jessyka is fully human",
+      "updatedAt": "2026-08-18T10:59:08.785Z"
+    },
+    "1827773478600359936": {
+      "handle": "Aikun011",
+      "behavioral": "reject",
+      "intent": "neutral",
+      "reason": "looks human",
+      "updatedAt": "2026-08-18T11:00:31.496Z"
+    }
+  }
+}
