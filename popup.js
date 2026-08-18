@@ -282,7 +282,42 @@
     $('contribute-custom').classList.toggle('hidden', $('contribute-amount').value !== 'custom');
   });
 
+  // ---- Proof badges ----
+  const BADGES_URL = 'https://rendezvous.metaspn.network/v1/vault/badges';
+  const badgesList = $('badges-list');
+
+  function renderBadges(data) {
+    const badges = (data && data.badges) || [];
+    if (!badges.length) {
+      badgesList.innerHTML = '<p class="small">No badges yet.</p>';
+      return;
+    }
+    badgesList.innerHTML = badges.map((b) =>
+      '<div class="badge">' +
+        '<div class="badge-row">' +
+          '<span class="badge-dot ' + (b.verified ? 'v' : 'u') + '"></span>' +
+          '<span class="badge-label">' + (b.label || 'Badge') + '</span>' +
+        '</div>' +
+        '<p class="badge-claim">' + (b.claim || '') + '</p>' +
+        (b.evidence_url
+          ? '<a class="badge-link" href="' + b.evidence_url + '" target="_blank" rel="noopener">View evidence →</a>'
+          : '<p class="badge-unverified">Unverified — evidence pending</p>') +
+      '</div>'
+    ).join('');
+  }
+
+  async function loadBadges() {
+    try {
+      const r = await fetch(BADGES_URL, { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      renderBadges(await r.json());
+    } catch (e) {
+      badgesList.innerHTML = '<p class="small">Badges unavailable: ' + (e?.message || e) + '</p>';
+    }
+  }
+
   loadBattery();
+  loadBadges();
 
   refreshStatus();
 })();
