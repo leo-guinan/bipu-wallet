@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>BIPU bot indicator — harness</title>
+<style>
+  body { font-family: -apple-system, sans-serif; background:#fff; color:#0f1419; padding:20px; }
+  article { border:1px solid #cfd9de; border-radius:12px; padding:12px; margin:10px 0; max-width:560px; }
+  [data-testid="User-Name"] { font-weight:700; margin-bottom:4px; }
+  [data-testid="tweetText"] { white-space:pre-wrap; }
+</style>
+</head>
+<body>
+<h3>BIPU bot indicator — fixture</h3>
+<p id="status">Loading…</p>
+
+  <!-- mimics x.com tweet article DOM: author name block + @handle + tweetText -->
+  <article data-testid="tweet">
+    <div data-testid="User-Name">
+      <span>MemeForTrees</span>
+      <span>@MemeForTrees</span>
+    </div>
+    <div data-testid="tweetText">onchain for everyone, in plain words 🔆🌷😆⭐😹🌲  much love famitree 💚 stay amazing friends  $MfT https://t.co/x</div>
+  </article>
+
+  <article data-testid="tweet">
+    <div data-testid="User-Name">
+      <span>boardyai</span>
+      <span>@boardyai</span>
+    </div>
+    <div data-testid="tweetText">I'm an AI superconnector who's made thousands of introductions within my network of 200,000 people.</div>
+  </article>
+
+  <article data-testid="tweet">
+    <div data-testid="User-Name">
+      <span>lilchiva</span>
+      <span>@lilchiva</span>
+    </div>
+    <div data-testid="tweetText">Yeah but basic cybernetics is just systems modeling/graphing. Like, my electrical panel and all the wiring is a cybernetic system.</div>
+  </article>
+
+  <article data-testid="tweet">
+    <div data-testid="User-Name">
+      <span>steve_mystery</span>
+      <span>@steve_mystery</span>
+    </div>
+    <div data-testid="tweetText">gm wen moon send it 100x 🚀🚀 buy now gem to the moon</div>
+  </article>
+
+  <article data-testid="tweet">
+    <div data-testid="User-Name">
+      <span>steve_mystery</span>
+      <span>@steve_mystery</span>
+    </div>
+    <div data-testid="tweetText">presale token contract launching now, wen airdrop snapshot</div>
+  </article>
+
+  <article data-testid="tweet">
+    <div data-testid="User-Name">
+      <span>steve_mystery</span>
+      <span>@steve_mystery</span>
+    </div>
+    <div data-testid="tweetText">ca is live, buy before the moon 🌙🌙 100x let's go</div>
+  </article>
+
+<!-- Load content scripts in the SAME order the manifest declares them. -->
+<script src="content/known-labels.js"></script>
+<script src="lib/bot-fingerprint.js"></script>
+<script src="content/bot-indicator.js"></script>
+<script>
+  // report after the indicator has had a chance to scan (it scans on DOMContentLoaded / immediately)
+  setTimeout(function () {
+    var badges = Array.from(document.querySelectorAll('.bipu-badge')).map(function (b) {
+      return b.getAttribute('data-bipu-handle') + '=' + b.textContent + '[' + b.className + ']';
+    });
+    var el = document.getElementById('status');
+    el.textContent = 'Badges: ' + (badges.length ? badges.join(', ') : 'NONE');
+  }, 500);
+</script>
+</body>
+</html>

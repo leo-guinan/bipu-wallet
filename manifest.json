@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "BIPU Wallet",
-  "version": "0.3.0",
-  "description": "Progressive wallet for BIPU: BIPU attestation identity + connect your Phantom for funds.",
+  "version": "0.3.1",
+  "description": "Progressive wallet for BIPU: BIPU attestation identity + connect your Phantom for funds. Bot indicator on tweets.",
   "action": {
     "default_popup": "popup.html",
     "default_title": "BIPU Wallet"
@@ -13,6 +13,19 @@
     "https://api.mainnet-beta.solana.com/",
     "https://lite-api.jup.ag/*",
     "https://api.jup.ag/*",
-    "https://rendezvous.metaspn.network/*"
+    "https://rendezvous.metaspn.network/*",
+    "https://x.com/*",
+    "https://twitter.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://x.com/*", "https://twitter.com/*"],
+      "js": [
+        "content/known-labels.js",
+        "lib/bot-fingerprint.js",
+        "content/bot-indicator.js"
+      ],
+      "run_at": "document_idle"
+    }
   ]
 }

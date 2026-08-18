@@ -19,6 +19,32 @@ fund, and not an investment product.
   possible). The SOL→OPEN crossing is a manual step; the button never opens a
   stock position for you.
 - **Phone home (opt-in)** — tells the network you exist.
+- **Bot indicator (tweets)** — a small colored dot next to an author's name on
+  x.com / twitter.com flagging confirmed labels and classifier-flagged bots.
+  Purely local: no network, no data leaves the browser.
+
+## Bot indicator on tweets
+
+When you browse x.com/twitter.com, the extension shows a small badge next to a
+tweet author's name:
+
+- **GOOD** (green) / **BOT** (red) / **HUMAN** (neutral) — accounts Leo has
+  already confirmed in review. These are baked in from
+  `data/fingerprint/human-decisions.json` and always show.
+- **BOT** (red, from the local classifier) — unknown accounts, only after the
+  author has enough tweets visible for the classifier to build a sample, and
+  only when the signal clears a confidence floor. A triage hint, not a verdict.
+- Hover a badge for the reason (known accounts) or the classifier's signals
+  (unknown accounts).
+
+Design honesty: the 2026-08 calibration measured **50% precision on 12-tweet
+samples**, so a single tweet is weak evidence. Unknown accounts get no badge
+until ~3 tweets are accumulated, and the classifier must score above the floor.
+Confirmed labels are the high-trust source; the classifier is secondary.
+
+No author data, tweet text, or labels are ever sent anywhere. Everything runs
+locally in the content script. Regenerate baked-in labels with
+`node scripts/gen-known-labels.js` after adding human-review decisions.
 
 ## The network count, stated honestly
 
@@ -44,6 +70,12 @@ only aggregate counts. It never returns raw public keys. See `collector/README.m
 - `injected/phantom-main.js` — MAIN-world probe that sees `window.solana`.
 - `injected/web3-bundle.js` — bundled `@solana/web3.js` (build artifact).
 - `lib/bipu-wallet.js` — pure WebCrypto Ed25519 keypair + signing.
+- `lib/bot-fingerprint.js` — timeline-aware bot classifier (shared with review).
+- `content/bot-indicator.js` — tweet badge content script (x.com/twitter.com).
+- `content/known-labels.js` — baked-in confirmed labels (generated).
+- `scripts/gen-known-labels.js` — regenerate baked-in labels from decisions.
+- `review/bot-review.html` — human review/triage page (flip through, confirm).
+- `test-page.html` — fixture harness for the badge content script.
 - `collector/` — the phone-home presence collector.
 
 ## Security boundary
