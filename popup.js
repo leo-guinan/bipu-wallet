@@ -202,5 +202,71 @@
   });
 
   renderTrainStatus();
+  // ---- Trust Vault battery ----
+  const VAULT_URL = 'https://rendezvous.metaspn.network/v1/vault/battery';
+  const fill = $('battery-fill');
+  const batteryText = $('battery-text');
+  const contribBtn = $('btn-contribute');
+  const vaultResult = $('vault-result');
+
+  function renderBattery(body) {
+    const pct = Math.min(100, Number(body.percent) || 0);
+    fill.style.width = pct + '%';
+    batteryText.textContent =
+      'Committed $' + Number(body.committed_usd || 0).toLocaleString() +
+      ' of $' + Number(body.threshold_usd || 0).toLocaleString() +
+      ' (' + Number(body.percent || 0).toFixed(1) + '%) · ' +
+      (Number(body.contributors) || 0) + ' contributors';
+  }
+
+  async function loadBattery() {
+    try {
+      const r = await fetch(VAULT_URL, { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const body = await r.json();
+      renderBattery(body);
+    } catch (e) {
+      batteryText.textContent = 'Battery unavailable: ' + (e?.message || e);
+    }
+  }
+
+  contribBtn.addEventListener('click', async () => {
+    setError(null);
+    contribBtn.disabled = true;
+    contribBtn.textContent = 'Opening checkout…';
+    try {
+      const status = await chrome.runtime.sendMessage({ type: 'GET_STATUS' });
+      const pk = status?.bipu?.publicKeyBase58 || '';
+      const res = await chrome.runtime.sendMessage({ type: 'VAULT_CONTRIBUTE', publicKey: pk, amountUsd: 25 });
+      if (res && res.error) {
+        vaultResult.innerHTML =
+          '<p class="err-title">Contribution not available: ' + (res.error) + '</p>' +
+          '<p class="small">The vault is not armed yet. You can still view the battery; no money moves until the vault is enabled.</p>';
+        vaultResult.classList.remove('hidden');
+        vaultResult.className = 'result err';
+        return;
+      }
+      if (res && res.checkout_url) {
+        chrome.tabs.create({ url: res.checkout_url });
+        vaultResult.innerHTML =
+          '<p class="ok-title">Checkout opened.</p>' +
+          '<p class="small">Your contribution charges the battery as support — not an investment.</p>';
+        vaultResult.classList.remove('hidden');
+        vaultResult.className = 'result ok';
+      }
+    } catch (e) {
+      vaultResult.innerHTML =
+        '<p class="err-title">Failed: ' + (e?.message || e) + '</p>' +
+        '<p class="small">The vault may not be deployed or armed yet. Nothing was charged.</p>';
+      vaultResult.classList.remove('hidden');
+      vaultResult.className = 'result err';
+    } finally {
+      contribBtn.disabled = false;
+      contribBtn.textContent = 'Charge the battery';
+    }
+  });
+
+  loadBattery();
+
   refreshStatus();
 })();

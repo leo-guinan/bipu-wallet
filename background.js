@@ -250,6 +250,24 @@ async function phoneHome() {
   return { ...json, at: observedAt };
 }
 
+// Trust Vault contribution: create a Stripe Checkout Session via the vault
+// service. Returns a checkout URL the user opens. Real money can move once they
+// complete checkout; the vault is ARMED. Contribution = support, not investment.
+async function vaultContribute(publicKey, amountUsd) {
+  const vault = 'https://rendezvous.metaspn.network/v1/vault/contribute';
+  const resp = await fetch(vault, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      public_key: String(publicKey || ''),
+      amount_usd: Number(amountUsd) || 25,
+    }),
+  });
+  const json = await resp.json().catch(() => ({}));
+  if (!resp.ok || json.error) throw new Error(json.error || ('vault_http_' + resp.status));
+  return { checkout_url: json.checkout_url, session_id: json.session_id, funds_moved: !!json.funds_moved };
+}
+
 // ---- message API ----
 chrome.runtime.onInstalled.addListener(async () => {
   await ensureWallet();
@@ -286,6 +304,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       case 'SET_COLLECTOR_URL':
         await setStored('bipu_collector_url_v1', String(message.url || ''));
         return { set: true };
+      case 'VAULT_CONTRIBUTE':
+        return await vaultContribute(message.publicKey, message.amountUsd);
       default:
         return { error: 'unknown_message' };
     }
