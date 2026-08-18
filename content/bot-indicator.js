@@ -37,7 +37,6 @@
 
   // ---- per-author accumulated sample (tweet text) for the local classifier ----
   var samples = {};   // handleLower -> array of tweet text
-  var done = {};      // handleLower -> true (badge already rendered)
   var MIN_TWEETS = 3; // require this many tweets before the classifier may flag an unknown account
   var MIN_SCORE = 45; // classifier BOT score floor (roughly matches 50%-precision calibration)
 
@@ -115,11 +114,14 @@
   }
 
   // ---- render a badge into the author name block ----
+  // Guard is PER-ARTICLE, not per-handle: on a scrolling SPA each tweet is its
+  // own <article>, and React re-renders replace article nodes (wiping badges).
+  // So every article whose author has a label gets one badge, and a badge that
+  // got wiped by a re-render is re-added on the next scan.
   function renderBadge(article, handle, badge) {
-    if (done[handle]) return;
+    if (article.querySelector('.bipu-badge[data-bipu-handle="' + handle + '"]')) return;
     var userBlock = article.querySelector('[data-testid="User-Name"]');
     if (!userBlock) return;
-    done[handle] = true;
 
     var el = document.createElement('span');
     el.className = 'bipu-badge ' + badge.cls;

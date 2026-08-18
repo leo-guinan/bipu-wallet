@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>BIPU bot indicator — re-render test</title></head>
+<body>
+  <div id="feed">
+    <article data-testid="tweet">
+      <div data-testid="User-Name"><span>MemeForTrees</span><span>@MemeForTrees</span></div>
+      <div data-testid="tweetText">onchain for everyone $MfT stay amazing 🔆🌷</div>
+    </article>
+  </div>
+<p id="status">…</p>
+<script src="content/known-labels.js"></script>
+<script src="lib/bot-fingerprint.js"></script>
+<script src="content/bot-indicator.js"></script>
+<script>
+  // after scan: check badge, then simulate React wiping + re-adding the article,
+  // then wait for the MutationObserver-driven rescan to re-add the badge.
+  function badges() {
+    return Array.from(document.querySelectorAll('.bipu-badge')).map(b => b.dataset.bipuHandle + '=' + b.textContent);
+  }
+  function simReactRerender() {
+    var feed = document.getElementById('feed');
+    feed.innerHTML = ''; // React wipes the DOM
+    feed.innerHTML =
+      '<article data-testid="tweet">' +
+        '<div data-testid="User-Name"><span>MemeForTrees</span><span>@MemeForTrees</span></div>' +
+        '<div data-testid="tweetText">another post $MfT stay amazing</div>' +
+      '</article>';
+    document.getElementById('status').textContent = 'after rerender: ' + badges().join(',') + ' (waiting for observer…)';
+  }
+  setTimeout(function () {
+    document.getElementById('status').textContent = 'after scan: ' + badges().join(',');
+    setTimeout(simReactRerender, 200);
+    setTimeout(function () {
+      document.getElementById('status').textContent += ' | final: ' + badges().join(',');
+    }, 800);
+  }, 400);
+</script>
+</body>
+</html>
